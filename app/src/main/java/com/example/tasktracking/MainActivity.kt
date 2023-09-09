@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tasktracking.databinding.ActivityMainBinding
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.DurationUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,24 +54,25 @@ class MainActivity : AppCompatActivity() {
 //            data.add(ItemsViewModel(R.drawable.ic_baseline_folder_24, "Item " + i))
 //        }
 
-        val sD = SchedulingData()
-        val tC = 2.hours
-        val tG = 4.hours
-        data.add(DurationTask("First task", sD, tG, tC))
+        val sD = 1
+        val tC = 2.toLong()
+        val tG = 4.toLong()
+        val unit = DurationUnit.HOURS.ordinal
+        data.add(DurationTask("First task", sD, tG, tC, unit))
         data.add(RepetitionTask("Second Task", sD, 6, 1))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
-        data.add(DurationTask("First task", sD, tG, tC))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
+        data.add(DurationTask("First task", sD, tG, tC, unit))
 
         // This will pass the ArrayList to our Adapter
         val adapter = TaskAdapter(data)
