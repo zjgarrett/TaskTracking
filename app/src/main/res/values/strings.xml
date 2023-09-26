@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Task Tracking</string>
     <string name="action_settings">Settings</string>
+    <string name="back_button">Back</string>
+    <string name="no_tasks_description">No tasks at the moment! Create some!</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
@@ -45,4 +47,17 @@
     </string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="task_entry_title">Add task</string>
+    <string name="starts">Starts %s</string>
+    <string name="date_format">d MMM, uuuu</string>
+    <string name="task_name_req">Task Name*</string>
+    <string name="task_type">Task Type</string>
+    <string name="goal_req">Task Goal Amount*</string>
+    <string name="required_fields">* = Required</string>
+    <string name="save_action">Save</string>
+    <string name="edit_task_title">Edit Task</string>
+    <string name="ends">Ends %s</string>
+    <string name="complete_per">Complete %s %s %s</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
 </resources>
