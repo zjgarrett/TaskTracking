@@ -47,6 +47,7 @@ import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.item.TaskDetails
 import com.example.tasktracking.ui.item.TaskEntryViewModel
 import com.example.tasktracking.ui.item.TaskUiState
+import com.example.tasktracking.ui.item.cleanInputDate
 import com.example.tasktracking.ui.item.formatDate
 import com.example.tasktracking.ui.item.readableString
 import com.example.tasktracking.ui.item.readableToLocalDate
@@ -189,8 +190,8 @@ fun TaskInputForm(
             modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = taskDetails.startDate,
-                onValueChange = { onValueChange(taskDetails.copy(startDate = it.formatDate())) },
+                value = taskDetails.startDate.formatDate(),
+                onValueChange = { onValueChange(taskDetails.copy(startDate = it.cleanInputDate())) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text(stringResource(R.string.start_date)) },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -203,8 +204,8 @@ fun TaskInputForm(
                 singleLine = true
             )
             OutlinedTextField(
-                value = taskDetails.endDate,
-                onValueChange = { onValueChange(taskDetails.copy(endDate = it)) },
+                value = taskDetails.endDate.formatDate(),
+                onValueChange = { onValueChange(taskDetails.copy(endDate = it.cleanInputDate())) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text(stringResource(R.string.end_date)) },
                 colors = OutlinedTextFieldDefaults.colors(

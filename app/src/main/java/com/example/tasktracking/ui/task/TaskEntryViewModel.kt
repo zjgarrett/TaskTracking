@@ -3,6 +3,7 @@ package com.example.tasktracking.ui.item
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.example.tasktracking.data.DEFAULT_FREQUENCY
 import com.example.tasktracking.data.Period
@@ -100,26 +101,35 @@ fun Task.toTaskUiState(isEntryValid: Boolean = false): TaskUiState = TaskUiState
     isEntryValid = isEntryValid
 )
 
+fun String.cleanInputDate(): String {
+    val cleaned = this.replace("/","")
+    if (cleaned.isEmpty()) return ""
+    val lastChar = cleaned[cleaned.length - 1]
+    println(lastChar)
+    if (!lastChar.isDigit() || cleaned.length > 8) return cleaned.substring(0,cleaned.length - 1)
+    return cleaned
+}
+
 fun String.formatDate(): String {
     if (this.isEmpty()) return ""
-    val lastChar = this[this.length - 1]
-    if (!lastChar.isDigit() && lastChar != '/') return this.substring(0,this.length - 1)
 
-    if (this.length == 2) {
-        return this.plus('/')
-    } else if (this.length == 5) {
-        return this.plus('/')
-    } else if (this.length == 11) return this.substring(0,10)
+    var formatted = this
+    if (this.length >= 3) {
+        formatted = this.substring(0,2) + '/' + this.substring(2)
+    }
+    if (this.length >= 5) {
+        formatted = formatted.substring(0,5) + '/' + formatted.substring(5)
+    }
 
-    return this
+    return formatted
 }
 
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this,
-    DateTimeFormatter.ofPattern("dd/MM/uuuu")
+    DateTimeFormatter.ofPattern("ddMMuuuu")
 )
 
 fun LocalDate.asString(): String {
-    return this.format(DateTimeFormatter.ofPattern("dd/MM/uuuu"))
+    return this.format(DateTimeFormatter.ofPattern("ddMMuuuu"))
 }
 
 /**
