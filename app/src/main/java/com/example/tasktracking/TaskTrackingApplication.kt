@@ -17,7 +17,6 @@
 package com.example.tasktracking
 
 import android.app.Application
-import android.util.Log
 import com.example.tasktracking.data.AppContainer
 import com.example.tasktracking.data.AppDataContainer
 

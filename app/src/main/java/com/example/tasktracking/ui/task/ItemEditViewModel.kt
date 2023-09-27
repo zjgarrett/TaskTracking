@@ -23,10 +23,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasktracking.data.TasksRepository
-import com.example.tasktracking.ui.item.TaskDetails
-import com.example.tasktracking.ui.item.TaskUiState
-import com.example.tasktracking.ui.item.toTask
-import com.example.tasktracking.ui.item.toTaskUiState
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

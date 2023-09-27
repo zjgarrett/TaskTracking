@@ -31,7 +31,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,12 +41,10 @@ import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskType
 import com.example.tasktracking.data.toTitleCase
 import com.example.tasktracking.ui.AppViewModelProvider
-import com.example.tasktracking.ui.item.readableString
+import com.example.tasktracking.ui.task.readableString
 import com.example.tasktracking.ui.navigation.NavigationDestination
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 object HomeDestination : NavigationDestination {
     override val route = "home"

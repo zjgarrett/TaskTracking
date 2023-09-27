@@ -1,18 +1,15 @@
 package com.example.tasktracking.ui.task
 
-import android.widget.RadioGroup
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,11 +22,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshots.readable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,19 +39,10 @@ import com.example.tasktracking.data.DEFAULT_FREQUENCY
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.TaskType
 import com.example.tasktracking.ui.AppViewModelProvider
-import com.example.tasktracking.ui.item.TaskDetails
-import com.example.tasktracking.ui.item.TaskEntryViewModel
-import com.example.tasktracking.ui.item.TaskUiState
-import com.example.tasktracking.ui.item.cleanInputDate
-import com.example.tasktracking.ui.item.formatDate
-import com.example.tasktracking.ui.item.readableString
-import com.example.tasktracking.ui.item.readableToLocalDate
 import com.example.tasktracking.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.util.Currency
-import java.util.Locale
 
 object TaskEntryDestination : NavigationDestination {
     override val route = "task_entry"
@@ -125,7 +111,6 @@ fun TaskEntryBody(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskInputForm(
     taskDetails: TaskDetails,
@@ -249,11 +234,8 @@ fun TaskInputForm(
                 DEFAULT_FREQUENCY.forEach { day ->
                     IconButton(
                         onClick = {
-                                  if (taskDetails.frequency.contains(day)) {
-                                      taskDetails.frequency.remove(day)
-                                  } else {
-                                      taskDetails.frequency.add(day)
-                                  }
+                            val set = ((taskDetails.frequency union mutableSetOf(day)) subtract (taskDetails.frequency intersect mutableSetOf(day))).toMutableSet()
+                            onValueChange(taskDetails.copy(frequency = set))
                         },
                         content = {
                             val color = if (taskDetails.frequency.contains(day)) {
@@ -294,7 +276,7 @@ private fun TaskEntryScreenPreview() {
     freq.remove(DayOfWeek.FRIDAY)
         TaskEntryBody(taskUiState = TaskUiState(
             TaskDetails(
-                name = "Task name", goal = "5", type = TaskType.Repetition, startDate = LocalDate.now().readableString(), frequency = freq
+                name = "Task name", goal = "5", type = TaskType.Repetition, startDate = LocalDate.now().asString(), frequency = freq
             )
         ), onTaskValueChange = {}, onSaveClick = {})
 }

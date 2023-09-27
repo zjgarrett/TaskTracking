@@ -1,14 +1,12 @@
-package com.example.tasktracking.ui.item
+package com.example.tasktracking.ui.task
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.example.tasktracking.data.DEFAULT_FREQUENCY
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.Task
-import com.example.tasktracking.data.TaskEvent
 import com.example.tasktracking.data.TaskType
 import com.example.tasktracking.data.TasksRepository
 import java.lang.Integer.parseInt
@@ -28,7 +26,7 @@ class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewMod
         private set
 
     /**
-     * Updates the [itemUiState] with the value provided in the argument. This method also triggers
+     * Updates the [taskUiState] with the value provided in the argument. This method also triggers
      * a validation for input values.
      */
     fun updateUiState(taskDetails: TaskDetails) {
@@ -39,7 +37,7 @@ class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewMod
     // TODO: FIX
     private fun validateInput(uiState: TaskDetails = taskUiState.taskDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank()
+            name.isNotBlank() && goal.isNotBlank() && frequency.isNotEmpty() && startDate < endDate
         }
     }
 
@@ -70,10 +68,7 @@ data class TaskDetails(
 )
 
 /**
- * TODO: FIX COMMENT
- * Extension function to convert [TaskDetails] to [Task]. If the value of [TaskDetails.price] is
- * not a valid [Double], then the price will be set to 0.0. Similarly if the value of
- * [TaskDetails.quantity] is not a valid [Int], then the quantity will be set to 0
+ * Extension function to convert [TaskDetails] to [Task]
  */
 fun TaskDetails.toTask(): Task = Task(
     id = id,
@@ -82,16 +77,13 @@ fun TaskDetails.toTask(): Task = Task(
     type = type,
     startDate = startDate.toLocalDate(),
     endDate = if (endDate != "") endDate.toLocalDate() else LocalDate.MAX,
-    period = period
+    period = period,
+    frequency = frequency
 )
 
 fun LocalDate.readableString(): String {
     return this.format(DateTimeFormatter.ofPattern("d MMM uuuu"))
 }
-
-fun readableToLocalDate(string: String): LocalDate = LocalDate.parse(string,
-    DateTimeFormatter.ofPattern("d MMM uuuu")
-)
 
 /**
  * Extension function to convert [Task] to [TaskUiState]
@@ -133,7 +125,7 @@ fun LocalDate.asString(): String {
 }
 
 /**
- * Extension function to convert [Item] to [ItemDetails]
+ * Extension function to convert [Task] to [TaskDetails]
  */
 fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     id = id,
@@ -142,5 +134,6 @@ fun Task.toTaskDetails(): TaskDetails = TaskDetails(
     type = type,
     startDate = startDate.asString(),
     endDate = if (endDate == LocalDate.MAX) "" else endDate.asString(),
-    period = period
+    period = period,
+    frequency = frequency
 )

@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tasktracking.ui.home.HomeViewModel
 import com.example.tasktracking.TaskTrackingApplication
-import com.example.tasktracking.ui.item.TaskEntryViewModel
+import com.example.tasktracking.ui.task.TaskEntryViewModel
 import com.example.tasktracking.ui.task.TaskEditViewModel
 
 /**
