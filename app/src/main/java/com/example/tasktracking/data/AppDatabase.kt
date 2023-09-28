@@ -11,17 +11,19 @@ import androidx.room.TypeConverters
     version = 1
 )
 @TypeConverters(Converters::class)
-abstract class TaskDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
+
+    abstract fun attemptDao(): AttemptDao
 
     companion object {
         @Volatile
-        private var Instance: TaskDatabase? = null
+        private var Instance: AppDatabase? = null
 
-        fun getDatabase(context: Context): TaskDatabase {
+        fun getDatabase(context: Context): AppDatabase {
             // if the Instance is not null, return it, otherwise create a new database instance.
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, TaskDatabase::class.java, "TaskDatabase")
+                Room.databaseBuilder(context, AppDatabase::class.java, "AppDatabase")
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }

@@ -36,12 +36,12 @@ object AppViewModelProvider {
         initializer {
             TaskEditViewModel(
                 this.createSavedStateHandle(),
-                taskTrackingApplication().container.tasksRepository
+                taskTrackingApplication().container.appRepository
             )
         }
         // Initializer for TaskEntryViewModel
         initializer {
-            TaskEntryViewModel(TaskTrackingApplication().container.tasksRepository)
+            TaskEntryViewModel(TaskTrackingApplication().container.appRepository)
         }
 //
 //        // Initializer for ItemDetailsViewModel
@@ -54,7 +54,7 @@ object AppViewModelProvider {
 
         // Initializer for HomeViewModel
         initializer {
-            HomeViewModel(taskTrackingApplication().container.tasksRepository)
+            HomeViewModel(taskTrackingApplication().container.appRepository)
         }
     }
 }

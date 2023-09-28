@@ -58,11 +58,3 @@ data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0
 )
 
-// TODO: Create database that contains all scheduled tasks
-// Scheme:
-//      ID: Int, Primary Key
-//      taskId: Int, Reference to Task.id
-//      date: LocalDate?
-//      progress: Int (numeric amount of task completed)
-//      completed: Boolean (if task was achieved fully)
-
