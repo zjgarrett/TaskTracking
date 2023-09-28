@@ -1,11 +1,9 @@
 package com.example.tasktracking.data
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.ForeignKey.Companion.CASCADE
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "attempted", foreignKeys = [ForeignKey(entity = Task::class, parentColumns = ["id"], childColumns = ["taskId"], onDelete = CASCADE)])
+@Entity(tableName = "attempted")
 data class Attempt(
     var taskId: Int = 0,
     var attemptDateStart: String,

@@ -1,6 +1,7 @@
 package com.example.tasktracking.data
 
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 /**
  * Repository that provides insert, update, delete, and retrieve of [Task] from a given data source.
@@ -57,4 +58,15 @@ interface AppRepository {
      * Update [Attempt] in the data source
      */
     suspend fun updateAttempt(attempt: Attempt)
+
+    /********** TaskWithAttempted Section ************/
+    /**
+     * Retrieve an [TaskWithAttempted] from the given data source that matches with the [id].
+     */
+    fun getByIdTaskWithAttemptedStream(id: Int): Flow<TaskWithAttempted>
+
+    /**
+     * Retrieve all [TaskWithAttempted]s from the given data source that overlap with the [date].
+     */
+    fun getAllByDateTaskWithAttemptedStream(date: LocalDate): Flow<List<TaskWithAttempted>>
 }

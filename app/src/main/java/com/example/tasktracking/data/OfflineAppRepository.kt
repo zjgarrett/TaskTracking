@@ -1,8 +1,13 @@
 package com.example.tasktracking.data
 
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
-class OfflineAppRepository(private val taskDao: TaskDao, private val attemptDao: AttemptDao) : AppRepository {
+class OfflineAppRepository(
+    private val taskDao: TaskDao,
+    private val attemptDao: AttemptDao,
+    private val taskWithAttemptedDao: TaskWithAttemptedDao
+) : AppRepository {
     override fun getAllTasksStream(): Flow<List<Task>> = taskDao.getAllTasks()
 
     override fun getTaskStream(id: Int): Flow<Task?> = taskDao.getTask(id)
@@ -22,4 +27,7 @@ class OfflineAppRepository(private val taskDao: TaskDao, private val attemptDao:
     override suspend fun deleteAttempt(attempt: Attempt) = attemptDao.delete(attempt)
 
     override suspend fun updateAttempt(attempt: Attempt) = attemptDao.upsert(attempt)
+    override fun getByIdTaskWithAttemptedStream(id: Int): Flow<TaskWithAttempted> = taskWithAttemptedDao.getByIdTaskWithAttempted(id)
+
+    override fun getAllByDateTaskWithAttemptedStream(date: LocalDate): Flow<List<TaskWithAttempted>> = taskWithAttemptedDao.getByDateTasksWithAttempted(date)
 }

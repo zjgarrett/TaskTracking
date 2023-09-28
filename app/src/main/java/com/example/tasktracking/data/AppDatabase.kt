@@ -16,6 +16,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun attemptDao(): AttemptDao
 
+    abstract fun taskWithAttemptedDao(): TaskWithAttemptedDao
+
     companion object {
         @Volatile
         private var Instance: AppDatabase? = null
