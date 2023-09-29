@@ -10,5 +10,5 @@ data class TaskWithAttempted(
         parentColumn = "id",
         entityColumn = "taskId"
     )
-    val attempts: Flow<List<Attempt>>
+    val attempts: List<Attempt>
 )

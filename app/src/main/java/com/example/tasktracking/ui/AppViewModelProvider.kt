@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tasktracking.ui.home.HomeViewModel
 import com.example.tasktracking.TaskTrackingApplication
+import com.example.tasktracking.ui.attempt.AttemptListViewModel
 import com.example.tasktracking.ui.task.TaskEntryViewModel
 import com.example.tasktracking.ui.task.TaskEditViewModel
 
@@ -43,15 +44,10 @@ object AppViewModelProvider {
         initializer {
             TaskEntryViewModel(TaskTrackingApplication().container.appRepository)
         }
-//
-//        // Initializer for ItemDetailsViewModel
-//        initializer {
-//            ItemDetailsViewModel(
-//                this.createSavedStateHandle(),
-//                inventoryApplication().container.itemsRepository
-//            )
-//        }
-
+        // Initializer for AttemptListViewModel
+        initializer {
+            AttemptListViewModel(TaskTrackingApplication().container.appRepository)
+        }
         // Initializer for HomeViewModel
         initializer {
             HomeViewModel(taskTrackingApplication().container.appRepository)

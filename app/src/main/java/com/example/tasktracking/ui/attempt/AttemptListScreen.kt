@@ -1,4 +1,4 @@
-package com.example.tasktracking.ui.home
+package com.example.tasktracking.ui.attempt
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
@@ -36,61 +36,49 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasktracking.R
 import com.example.tasktracking.TaskTrackingTopAppBar
+import com.example.tasktracking.data.Attempt
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskType
+import com.example.tasktracking.data.TaskWithAttempted
 import com.example.tasktracking.data.toTitleCase
 import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.task.readableString
 import com.example.tasktracking.ui.navigation.NavigationDestination
+import kotlinx.coroutines.flow.Flow
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-object HomeDestination : NavigationDestination {
-    override val route = "home"
+object AttemptListDestination : NavigationDestination {
+    override val route = "attempted_list"
     override val titleRes = R.string.app_name
 }
 
 /**
- * Entry route for Home screen
+ * Entry route for Attempt List screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(
-    navigateToTaskEntry: () -> Unit,
-    navigateToTaskEdit: (Int) -> Unit,
+fun AttemptListScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: AttemptListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val homeUiState by viewModel.homeUiState.collectAsState()
+    val attemptListUiState by viewModel.attemptListUiState.collectAsState()
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TaskTrackingTopAppBar(
-                title = stringResource(HomeDestination.titleRes),
+                title = stringResource(AttemptListDestination.titleRes),
                 canNavigateBack = false,
                 scrollBehavior = scrollBehavior
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToTaskEntry,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.task_entry_title)
-                )
-            }
-        },
+        }
     ) { innerPadding ->
-        HomeBody(
-            taskList = homeUiState.taskList,
-            onTaskClick = navigateToTaskEdit,
+        AttemptListBody(
+            attemptedTaskList = attemptListUiState.taskWithAttemptedList,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -99,23 +87,22 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeBody(
-    taskList: List<Task>, onTaskClick: (Int) -> Unit, modifier: Modifier = Modifier
+private fun AttemptListBody(
+    attemptedTaskList: List<TaskWithAttempted>, modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        if (taskList.isEmpty()) {
+        if (attemptedTaskList.isEmpty()) {
             Text(
-                text = stringResource(R.string.no_tasks_description),
+                text = stringResource(R.string.no_tasks_description) + " Today",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
         } else {
-            TaskList(
-                taskList = taskList,
-                onTaskClick = { onTaskClick(it.id) },
+            AttemptedTaskList(
+                attemptedTaskList = attemptedTaskList,
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
         }
@@ -123,23 +110,28 @@ private fun HomeBody(
 }
 
 @Composable
-private fun TaskList(
-    taskList: List<Task>, onTaskClick: (Task) -> Unit, modifier: Modifier = Modifier
+private fun AttemptedTaskList(
+    attemptedTaskList: List<TaskWithAttempted>, modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
-        items(items = taskList, key = { it.id }) { task ->
-            IndividualTask(task = task,
+        items(items = attemptedTaskList, key = { it.task.id }) { attempt ->
+            IndividualAttempt(taskWithAttempted = attempt,
                 modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small))
-                    .clickable { onTaskClick(task) })
+                    .padding(dimensionResource(id = R.dimen.padding_small)))
         }
     }
 }
 
 @Composable
-private fun IndividualTask(
-    task: Task, modifier: Modifier = Modifier
+private fun IndividualAttempt(
+    taskWithAttempted: TaskWithAttempted, modifier: Modifier = Modifier
 ) {
+    val attempt: Attempt = if (taskWithAttempted.attempts.isNotEmpty()) {
+        taskWithAttempted.attempts[0]
+    } else {
+        Attempt(taskWithAttempted.task.id, LocalDate.now(), LocalDate.now())
+    }
+
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -152,12 +144,12 @@ private fun IndividualTask(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = task.name,
+                    text = taskWithAttempted.task.name + ": " + attempt.completed.toString(),
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = task.period.toAdjective(),
+                    text = taskWithAttempted.task.period.toAdjective(),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -165,27 +157,27 @@ private fun IndividualTask(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.starts, task.startDate.readableString()),
+                    text = stringResource(R.string.starts, taskWithAttempted.task.startDate.readableString()),
                     style = MaterialTheme.typography.titleMedium
                 )
-                if (task.endDate != LocalDate.MAX) {
+                if (taskWithAttempted.task.endDate != LocalDate.MAX) {
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = stringResource(R.string.ends, task.endDate.readableString()),
+                        text = stringResource(R.string.ends, taskWithAttempted.task.endDate.readableString()),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
-            val (amount, unit) = when (task.type) {
+            val (amount, unit) = when (taskWithAttempted.task.type) {
                 TaskType.Repetition -> {
-                    val temp = if (task.goal == 1) "time" else "times"
-                    Pair(task.goal.toString(), temp)
+                    val temp = if (taskWithAttempted.task.goal == 1) "time" else "times"
+                    Pair(taskWithAttempted.task.goal.toString(), temp)
                 }
-                TaskType.Duration -> if (task.goal > 60) Pair((task.goal.toFloat() / 60.toFloat()).toString(), "hours") else Pair(task.goal.toString(), "minutes")
+                TaskType.Duration -> if (taskWithAttempted.task.goal > 60) Pair((taskWithAttempted.task.goal.toFloat() / 60.toFloat()).toString(), "hours") else Pair(taskWithAttempted.task.goal.toString(), "minutes")
             }
-            val (howOften, specificDays) = when (task.period) {
-                Period.DAY -> if (task.frequency.size == 7) Pair(task.period.toAdjective(), false) else Pair("on days", true)
-                else -> Pair(task.period.toAdjective(), false)
+            val (howOften, specificDays) = when (taskWithAttempted.task.period) {
+                Period.DAY -> if (taskWithAttempted.task.frequency.size == 7) Pair(taskWithAttempted.task.period.toAdjective(), false) else Pair("on days", true)
+                else -> Pair(taskWithAttempted.task.period.toAdjective(), false)
             }
             Text(
                 text = stringResource(R.string.complete_per, amount, unit, howOften.lowercase()),
@@ -193,7 +185,7 @@ private fun IndividualTask(
             )
             if (specificDays) {
                 var days = ""
-                for (day in task.frequency) {
+                for (day in taskWithAttempted.task.frequency) {
                     days += day.toTitleCase() + " "
                 }
                 Text(
@@ -207,9 +199,9 @@ private fun IndividualTask(
 
 @Preview(showBackground = true)
 @Composable
-fun HomeBodyPreview() {
-    HomeBody(listOf(
-        Task(
+fun AttemptListBodyPreview() {
+    AttemptListBody(listOf(
+        TaskWithAttempted(Task(
             "Walk",
             1,
             TaskType.Repetition,
@@ -217,27 +209,27 @@ fun HomeBodyPreview() {
             frequency = mutableSetOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
             endDate = LocalDate.of(2024, 3, 3),
             id= 0
-        ),
-        Task(
+        ), listOf(Attempt(0, LocalDate.now(), LocalDate.now(), 1))),
+        TaskWithAttempted(Task(
             "Read Book",
             90,
             TaskType.Duration,
             period = Period.WEEK,
             id= 1
-        )
-    ), onTaskClick = {})
+        ), listOf())
+    ))
 }
 
 @Preview(showBackground = true)
 @Composable
-fun HomeBodyEmptyListPreview() {
-        HomeBody(listOf(), onTaskClick = {})
+fun AttemptListBodyEmptyListPreview() {
+        AttemptListBody(listOf())
 }
 
 @Preview(showBackground = true)
 @Composable
-fun IndividualTaskPreview() {
-        IndividualTask(
-            Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3))
+fun IndividualAttemptPreview() {
+        IndividualAttempt(
+            TaskWithAttempted(Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3)), listOf())
         )
 }

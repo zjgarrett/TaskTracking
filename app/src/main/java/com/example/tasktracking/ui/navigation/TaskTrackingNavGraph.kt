@@ -23,6 +23,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.tasktracking.ui.attempt.AttemptListDestination
+import com.example.tasktracking.ui.attempt.AttemptListScreen
 import com.example.tasktracking.ui.home.HomeDestination
 import com.example.tasktracking.ui.home.HomeScreen
 import com.example.tasktracking.ui.task.TaskEditDestination
@@ -79,6 +81,11 @@ fun TaskTrackingNavHost(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )
+        }
+        composable(
+            route = AttemptListDestination.route
+        ) {
+            AttemptListScreen()
         }
     }
 }

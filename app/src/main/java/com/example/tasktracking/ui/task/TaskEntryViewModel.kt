@@ -4,11 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.tasktracking.data.AppRepository
 import com.example.tasktracking.data.DEFAULT_FREQUENCY
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskType
-import com.example.tasktracking.data.TasksRepository
 import java.lang.Integer.parseInt
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 /**
  * ViewModel to validate and insert items in the Room database.
  */
-class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
+class TaskEntryViewModel(private val appRepository: AppRepository) : ViewModel() {
 
     /**
      * Holds current item ui state
@@ -43,7 +43,7 @@ class TaskEntryViewModel(private val tasksRepository: TasksRepository) : ViewMod
 
     suspend fun saveTask() {
         if (validateInput()) {
-            tasksRepository.insertTask(taskUiState.taskDetails.toTask())
+            appRepository.insertTask(taskUiState.taskDetails.toTask())
         }
     }
 }

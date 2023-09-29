@@ -22,22 +22,22 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tasktracking.data.TasksRepository
+import com.example.tasktracking.data.AppRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel to retrieve and update an task from the [TasksRepository]'s data source.
+ * ViewModel to retrieve and update an task from the [AppRepository]'s data source.
  */
 class TaskEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val tasksRepository: TasksRepository
+    private val appRepository: AppRepository
 ) : ViewModel() {
     private val taskId: Int = checkNotNull(savedStateHandle[TaskEditDestination.taskIdArg])
     init {
         viewModelScope.launch {
-            taskUiState = tasksRepository.getTaskStream(taskId)
+            taskUiState = appRepository.getTaskStream(taskId)
                 .filterNotNull()
                 .first()
                 .toTaskUiState(true)
@@ -64,7 +64,7 @@ class TaskEditViewModel(
 
     suspend fun updateTask() {
         if (validateInput(taskUiState.taskDetails)) {
-            tasksRepository.updateTask(taskUiState.taskDetails.toTask())
+            appRepository.updateTask(taskUiState.taskDetails.toTask())
         }
     }
 }

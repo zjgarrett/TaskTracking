@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [Task::class],
+    entities = [Task::class, Attempt::class],
     version = 1
 )
 @TypeConverters(Converters::class)
