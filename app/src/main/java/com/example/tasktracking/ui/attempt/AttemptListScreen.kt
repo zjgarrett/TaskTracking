@@ -1,7 +1,6 @@
 package com.example.tasktracking.ui.attempt
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +12,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,8 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -45,13 +45,15 @@ import com.example.tasktracking.data.toTitleCase
 import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.task.readableString
 import com.example.tasktracking.ui.navigation.NavigationDestination
-import kotlinx.coroutines.flow.Flow
+import com.example.tasktracking.ui.task.asString
 import java.time.DayOfWeek
 import java.time.LocalDate
 
 object AttemptListDestination : NavigationDestination {
     override val route = "attempted_list"
     override val titleRes = R.string.app_name
+    const val dateArg = "date"
+    val routeWithArgs = "$route?$dateArg={$dateArg}"
 }
 
 /**
@@ -61,11 +63,14 @@ object AttemptListDestination : NavigationDestination {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AttemptListScreen(
+    navigateToNextDay: (String) -> Unit,
+    navigateToPreviousDay: (String) -> Unit,
+    navigateToTaskListScreen: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AttemptListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val attemptListUiState by viewModel.attemptListUiState.collectAsState()
+    val attemptListUiState = viewModel.attemptListUiState
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -75,9 +80,24 @@ fun AttemptListScreen(
                 canNavigateBack = false,
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = navigateToTaskListScreen,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.task_entry_title)
+                )
+            }
+        },
     ) { innerPadding ->
         AttemptListBody(
+            dateUsed = viewModel.getDateUsed(),
+            navigateToNextDay = navigateToNextDay,
+            navigateToPreviousDay = navigateToPreviousDay,
             attemptedTaskList = attemptListUiState.taskWithAttemptedList,
             modifier = Modifier
                 .padding(innerPadding)
@@ -88,12 +108,34 @@ fun AttemptListScreen(
 
 @Composable
 private fun AttemptListBody(
-    attemptedTaskList: List<TaskWithAttempted>, modifier: Modifier = Modifier
+    dateUsed: LocalDate,
+    navigateToNextDay: (String) -> Unit,
+    navigateToPreviousDay: (String) -> Unit,
+    attemptedTaskList: List<TaskWithAttempted>,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
+        Row(
+
+        ) {
+            Button(
+                onClick = {
+                    navigateToPreviousDay(dateUsed.minusDays(1).asString()) },
+                content = {
+                    Icon(Icons.Filled.ArrowBack, "previous day")
+                }
+            )
+            Text(text = dateUsed.readableString())
+            Button(
+                onClick = { navigateToNextDay(dateUsed.plusDays(1).asString()) },
+                content = {
+                    Icon(Icons.Filled.ArrowForward, "Next day")
+                }
+            )
+        }
         if (attemptedTaskList.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_tasks_description) + " Today",
@@ -129,7 +171,7 @@ private fun IndividualAttempt(
     val attempt: Attempt = if (taskWithAttempted.attempts.isNotEmpty()) {
         taskWithAttempted.attempts[0]
     } else {
-        Attempt(taskWithAttempted.task.id, LocalDate.now(), LocalDate.now())
+        Attempt(taskWithAttempted.task.id, LocalDate.now(), LocalDate.now(), completed = 100)
     }
 
     Card(
@@ -144,7 +186,7 @@ private fun IndividualAttempt(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = taskWithAttempted.task.name + ": " + attempt.completed.toString(),
+                    text = taskWithAttempted.task.name + ": Completed " + attempt.completed.toString() + " times",
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
@@ -200,7 +242,11 @@ private fun IndividualAttempt(
 @Preview(showBackground = true)
 @Composable
 fun AttemptListBodyPreview() {
-    AttemptListBody(listOf(
+    AttemptListBody(
+        LocalDate.now(),
+        {},
+        {},
+        listOf(
         TaskWithAttempted(Task(
             "Walk",
             1,
@@ -223,7 +269,12 @@ fun AttemptListBodyPreview() {
 @Preview(showBackground = true)
 @Composable
 fun AttemptListBodyEmptyListPreview() {
-        AttemptListBody(listOf())
+        AttemptListBody(
+            LocalDate.now(),
+            {},
+            {},
+            listOf(),
+        )
 }
 
 @Preview(showBackground = true)

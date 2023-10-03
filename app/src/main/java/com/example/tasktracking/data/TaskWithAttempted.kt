@@ -2,7 +2,6 @@ package com.example.tasktracking.data
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import kotlinx.coroutines.flow.Flow
 
 data class TaskWithAttempted(
     @Embedded val task: Task,
@@ -10,5 +9,5 @@ data class TaskWithAttempted(
         parentColumn = "id",
         entityColumn = "taskId"
     )
-    val attempts: List<Attempt>
+    var attempts: List<Attempt>
 )

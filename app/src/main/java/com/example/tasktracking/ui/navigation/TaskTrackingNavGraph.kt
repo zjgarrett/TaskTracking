@@ -31,6 +31,8 @@ import com.example.tasktracking.ui.task.TaskEditDestination
 import com.example.tasktracking.ui.task.TaskEditScreen
 import com.example.tasktracking.ui.task.TaskEntryDestination
 import com.example.tasktracking.ui.task.TaskEntryScreen
+import com.example.tasktracking.ui.task.asString
+import java.time.LocalDate
 
 
 /**
@@ -43,7 +45,7 @@ fun TaskTrackingNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = HomeDestination.route,
+        startDestination = AttemptListDestination.routeWithArgs,
         modifier = modifier
     ) {
         composable(route = HomeDestination.route) {
@@ -51,7 +53,8 @@ fun TaskTrackingNavHost(
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route)
                     },
                 navigateToTaskEdit = { navController.navigate("${TaskEditDestination.route}/${it}")
-                    }
+                    },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
         composable(route = TaskEntryDestination.route) {
@@ -83,9 +86,14 @@ fun TaskTrackingNavHost(
             )
         }
         composable(
-            route = AttemptListDestination.route
+            route = AttemptListDestination.routeWithArgs,
+            arguments = listOf(navArgument("date") { defaultValue = LocalDate.now().asString() })
         ) {
-            AttemptListScreen()
+            AttemptListScreen(
+                navigateToNextDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
+                navigateToPreviousDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
+                navigateToTaskListScreen = { navController.navigate(HomeDestination.route) }
+            )
         }
     }
 }

@@ -42,11 +42,11 @@ object AppViewModelProvider {
         }
         // Initializer for TaskEntryViewModel
         initializer {
-            TaskEntryViewModel(TaskTrackingApplication().container.appRepository)
+            TaskEntryViewModel(taskTrackingApplication().container.appRepository)
         }
         // Initializer for AttemptListViewModel
         initializer {
-            AttemptListViewModel(TaskTrackingApplication().container.appRepository)
+            AttemptListViewModel(this.createSavedStateHandle(),taskTrackingApplication().container.appRepository)
         }
         // Initializer for HomeViewModel
         initializer {

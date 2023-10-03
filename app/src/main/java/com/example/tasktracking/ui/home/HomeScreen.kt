@@ -60,7 +60,9 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToTaskEntry: () -> Unit,
     navigateToTaskEdit: (Int) -> Unit,
+    onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
+    canNavigateBack: Boolean = true,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -71,7 +73,8 @@ fun HomeScreen(
         topBar = {
             TaskTrackingTopAppBar(
                 title = stringResource(HomeDestination.titleRes),
-                canNavigateBack = false,
+                canNavigateBack = canNavigateBack,
+                navigateUp = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         },
