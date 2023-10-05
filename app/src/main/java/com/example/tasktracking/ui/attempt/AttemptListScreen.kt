@@ -25,29 +25,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasktracking.R
 import com.example.tasktracking.TaskTrackingTopAppBar
 import com.example.tasktracking.data.Attempt
 import com.example.tasktracking.data.Period
-import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskType
-import com.example.tasktracking.data.TaskWithAttempted
 import com.example.tasktracking.data.toTitleCase
 import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.task.readableString
 import com.example.tasktracking.ui.navigation.NavigationDestination
 import com.example.tasktracking.ui.task.asString
-import java.time.DayOfWeek
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.reflect.KSuspendFunction1
 
 object AttemptListDestination : NavigationDestination {
     override val route = "attempted_list"
@@ -70,7 +69,8 @@ fun AttemptListScreen(
     viewModel: AttemptListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val attemptListUiState = viewModel.attemptListUiState
+    val attemptUiState = viewModel.attemptUiState
+    val updateAttempt = viewModel::updateAttempt
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -98,7 +98,8 @@ fun AttemptListScreen(
             dateUsed = viewModel.getDateUsed(),
             navigateToNextDay = navigateToNextDay,
             navigateToPreviousDay = navigateToPreviousDay,
-            attemptedTaskList = attemptListUiState.taskWithAttemptedList,
+            attemptUiState = attemptUiState,
+            updateAttempt = updateAttempt,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -111,7 +112,8 @@ private fun AttemptListBody(
     dateUsed: LocalDate,
     navigateToNextDay: (String) -> Unit,
     navigateToPreviousDay: (String) -> Unit,
-    attemptedTaskList: List<TaskWithAttempted>,
+    attemptUiState: AttemptUiState,
+    updateAttempt: KSuspendFunction1<Attempt, Unit>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -136,7 +138,7 @@ private fun AttemptListBody(
                 }
             )
         }
-        if (attemptedTaskList.isEmpty()) {
+        if (attemptUiState.daily.isEmpty() && attemptUiState.weekly.isEmpty() && attemptUiState.monthly.isEmpty() && attemptUiState.completed.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_tasks_description) + " Today",
                 textAlign = TextAlign.Center,
@@ -144,7 +146,8 @@ private fun AttemptListBody(
             )
         } else {
             AttemptedTaskList(
-                attemptedTaskList = attemptedTaskList,
+                attemptUiState = attemptUiState,
+                updateAttempt = updateAttempt,
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
         }
@@ -153,26 +156,56 @@ private fun AttemptListBody(
 
 @Composable
 private fun AttemptedTaskList(
-    attemptedTaskList: List<TaskWithAttempted>, modifier: Modifier = Modifier
+    attemptUiState: AttemptUiState,
+    updateAttempt: KSuspendFunction1<Attempt, Unit>,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
-        items(items = attemptedTaskList, key = { it.task.id }) { attempt ->
-            IndividualAttempt(taskWithAttempted = attempt,
+        items(items = attemptUiState.daily.toList(), key = { it }) { attempt ->
+            IndividualAttempt(
+                taskWithAttempted = attempt.second,
+                updateAttempt = updateAttempt,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small)))
+        }
+        items(items = attemptUiState.weekly.toList(), key = { it }) { attempt ->
+            IndividualAttempt(
+                taskWithAttempted = attempt.second,
+                updateAttempt = updateAttempt,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_small)))
+        }
+        items(items = attemptUiState.monthly.toList(), key = { it }) { attempt ->
+            IndividualAttempt(
+                taskWithAttempted = attempt.second,
+                updateAttempt = updateAttempt,
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.padding_small)))
+        }
+        if (attemptUiState.completed.isNotEmpty()) {
+            item {
+                Text(text = "Completed tasks")
+            }
+            items(items = attemptUiState.completed.toList(), key = { it }) { attempt ->
+                IndividualAttempt(
+                    taskWithAttempted = attempt.second,
+                    updateAttempt = updateAttempt,
+                    modifier = Modifier
+                        .padding(dimensionResource(id = R.dimen.padding_small))
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun IndividualAttempt(
-    taskWithAttempted: TaskWithAttempted, modifier: Modifier = Modifier
+    taskWithAttempted: TaskWithAttemptedDetails,
+    updateAttempt: KSuspendFunction1<Attempt, Unit>,
+    modifier: Modifier = Modifier
 ) {
-    val attempt: Attempt = if (taskWithAttempted.attempts.isNotEmpty()) {
-        taskWithAttempted.attempts[0]
-    } else {
-        Attempt(taskWithAttempted.task.id, LocalDate.now(), LocalDate.now(), completed = 100)
-    }
+    val attempt: Attempt = taskWithAttempted.attempt
+    val coroutineScope = rememberCoroutineScope()
 
     Card(
         modifier = modifier,
@@ -199,13 +232,13 @@ private fun IndividualAttempt(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.starts, taskWithAttempted.task.startDate.readableString()),
+                    text = stringResource(R.string.starts, attempt.attemptDateStart.readableString()),
                     style = MaterialTheme.typography.titleMedium
                 )
                 if (taskWithAttempted.task.endDate != LocalDate.MAX) {
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = stringResource(R.string.ends, taskWithAttempted.task.endDate.readableString()),
+                        text = stringResource(R.string.ends, attempt.attemptDateEnd.readableString()),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -235,52 +268,61 @@ private fun IndividualAttempt(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+            Button(
+                onClick = { coroutineScope.launch{
+                    updateAttempt(attempt.copy(completed = attempt.completed + 1))
+                } },
+                enabled = true,
+                content = {
+                    Icon(Icons.Filled.Add, "Add completion")
+                }
+            )
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AttemptListBodyPreview() {
-    AttemptListBody(
-        LocalDate.now(),
-        {},
-        {},
-        listOf(
-        TaskWithAttempted(Task(
-            "Walk",
-            1,
-            TaskType.Repetition,
-            Period.DAY,
-            frequency = mutableSetOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
-            endDate = LocalDate.of(2024, 3, 3),
-            id= 0
-        ), listOf(Attempt(0, LocalDate.now(), LocalDate.now(), 1))),
-        TaskWithAttempted(Task(
-            "Read Book",
-            90,
-            TaskType.Duration,
-            period = Period.WEEK,
-            id= 1
-        ), listOf())
-    ))
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AttemptListBodyEmptyListPreview() {
-        AttemptListBody(
-            LocalDate.now(),
-            {},
-            {},
-            listOf(),
-        )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun IndividualAttemptPreview() {
-        IndividualAttempt(
-            TaskWithAttempted(Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3)), listOf())
-        )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun AttemptListBodyPreview() {
+//    AttemptListBody(
+//        LocalDate.now(),
+//        {},
+//        {},
+//        AttemptUiState(
+//        TaskWithAttemptedDetails(Task(
+//            "Walk",
+//            1,
+//            TaskType.Repetition,
+//            Period.DAY,
+//            frequency = mutableSetOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
+//            endDate = LocalDate.of(2024, 3, 3),
+//            id= 0
+//        ), Attempt(0, LocalDate.now(), LocalDate.now(), 1)),
+//        TaskWithAttemptedDetails(Task(
+//            "Read Book",
+//            90,
+//            TaskType.Duration,
+//            period = Period.WEEK,
+//            id= 1
+//        ), Attempt(0, LocalDate.now(), LocalDate.now(), 1))))
+//    ))
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun AttemptListBodyEmptyListPreview() {
+//        AttemptListBody(
+//            LocalDate.now(),
+//            {},
+//            {},
+//            listOf(),
+//        )
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun IndividualAttemptPreview() {
+//        IndividualAttempt(
+//            TaskWithAttempted(Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3)), listOf())
+//        )
+//}
