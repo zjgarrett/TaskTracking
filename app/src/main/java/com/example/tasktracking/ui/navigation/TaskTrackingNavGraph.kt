@@ -25,6 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.tasktracking.ui.attempt.AttemptListDestination
 import com.example.tasktracking.ui.attempt.AttemptListScreen
+import com.example.tasktracking.ui.attempt.TaskAttemptDetailDestination
+import com.example.tasktracking.ui.attempt.TaskAttemptDetailScreen
 import com.example.tasktracking.ui.home.HomeDestination
 import com.example.tasktracking.ui.home.HomeScreen
 import com.example.tasktracking.ui.task.TaskEditDestination
@@ -52,8 +54,7 @@ fun TaskTrackingNavHost(
             HomeScreen(
                 navigateToTaskEntry = { navController.navigate(TaskEntryDestination.route)
                     },
-                navigateToTaskEdit = { navController.navigate("${TaskEditDestination.route}/${it}")
-                    },
+                navigateToTaskAttempt = { navController.navigate("${TaskAttemptDetailDestination.route}?${TaskAttemptDetailDestination.taskId}=${it}") },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
@@ -63,17 +64,6 @@ fun TaskTrackingNavHost(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-//        composable(
-//            route = ItemDetailsDestination.routeWithArgs,
-//            arguments = listOf(navArgument(ItemDetailsDestination.itemIdArg) {
-//                type = NavType.IntType
-//            })
-//        ) {
-//            ItemDetailsScreen(
-//                navigateToEditItem = { navController.navigate("${ItemEditDestination.route}/$it") },
-//                navigateBack = { navController.navigateUp() }
-//            )
-//        }
         composable(
             route = TaskEditDestination.routeWithArgs,
             arguments = listOf(navArgument(TaskEditDestination.taskIdArg) {
@@ -93,6 +83,14 @@ fun TaskTrackingNavHost(
                 navigateToNextDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
                 navigateToPreviousDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
                 navigateToTaskListScreen = { navController.navigate(HomeDestination.route) }
+            )
+        }
+        composable(
+            route = TaskAttemptDetailDestination.routeWithArgs,
+            arguments = listOf(navArgument(TaskAttemptDetailDestination.taskId) { type = NavType.IntType })
+        ) {
+            TaskAttemptDetailScreen(
+                navigateToTaskEdit = { navController.navigate("${TaskEditDestination.route}/${it}") },
             )
         }
     }

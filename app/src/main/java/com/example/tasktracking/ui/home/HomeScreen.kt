@@ -59,7 +59,7 @@ object HomeDestination : NavigationDestination {
 @Composable
 fun HomeScreen(
     navigateToTaskEntry: () -> Unit,
-    navigateToTaskEdit: (Int) -> Unit,
+    navigateToTaskAttempt: (Int) -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
     canNavigateBack: Boolean = true,
@@ -93,7 +93,7 @@ fun HomeScreen(
     ) { innerPadding ->
         HomeBody(
             taskList = homeUiState.taskList,
-            onTaskClick = navigateToTaskEdit,
+            onTaskClick = navigateToTaskAttempt,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -140,7 +140,7 @@ private fun TaskList(
 }
 
 @Composable
-private fun IndividualTask(
+fun IndividualTask(
     task: Task, modifier: Modifier = Modifier
 ) {
     Card(

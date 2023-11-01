@@ -37,7 +37,7 @@ class TaskEntryViewModel(private val appRepository: AppRepository) : ViewModel()
     // TODO: FIX
     private fun validateInput(uiState: TaskDetails = taskUiState.taskDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank() && goal.isNotBlank() && frequency.isNotEmpty() && startDate < endDate
+            name.isNotBlank() && goal.isNotBlank() && frequency.isNotEmpty()
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.tasktracking.ui.attempt
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -68,6 +69,7 @@ fun List<TaskWithAttempted>.toAttemptUiState(date: LocalDate): AttemptUiState {
     val completed = mutableMapOf<Int, TaskWithAttemptedDetails>()
 
     for (i in indices) {
+        Log.d("HELP", this[i].task.name)
         val taskAttempt = this[i]
         var attemptExists = false
         var todaysAttempt = Attempt(taskAttempt.task.id, date, date)

@@ -323,6 +323,10 @@ private fun IndividualAttempt(
 //@Composable
 //fun IndividualAttemptPreview() {
 //        IndividualAttempt(
-//            TaskWithAttempted(Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3)), listOf())
+//            TaskWithAttemptedDetails(
+//                Task("Walk", 1, TaskType.Repetition, Period.DAY, endDate = LocalDate.of(2023, 11, 3)),
+//                Attempt(1, LocalDate.now(), LocalDate.now()),
+//            )
 //        )
+//
 //}
