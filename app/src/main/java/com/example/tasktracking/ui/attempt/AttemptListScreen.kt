@@ -120,9 +120,7 @@ private fun AttemptListBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Row(
-
-        ) {
+        Row {
             Button(
                 onClick = {
                     navigateToPreviousDay(dateUsed.minusDays(1).asString()) },

@@ -88,7 +88,7 @@ fun TaskAttemptDetailBody(
     taskAttemptUiState: TaskAttemptDetailUiState,
     modifier: Modifier = Modifier
 ) {
-    Column() {
+    Column {
         IndividualTask(
             taskAttemptUiState.task,
             modifier
