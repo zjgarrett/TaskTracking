@@ -69,7 +69,6 @@ fun List<TaskWithAttempted>.toAttemptUiState(date: LocalDate): AttemptUiState {
     val completed = mutableMapOf<Int, TaskWithAttemptedDetails>()
 
     for (i in indices) {
-        Log.d("HELP", this[i].task.name)
         val taskAttempt = this[i]
         var attemptExists = false
         var todaysAttempt = Attempt(taskAttempt.task.id, date, date)
