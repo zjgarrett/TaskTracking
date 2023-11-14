@@ -57,6 +57,8 @@ object TaskAttemptDetailDestination : NavigationDestination {
 fun TaskAttemptDetailScreen(
     navigateToTaskEdit: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateUp: () -> Unit,
+    canNavigateBack: Boolean = true,
     viewModel: TaskAttemptDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -67,7 +69,8 @@ fun TaskAttemptDetailScreen(
         topBar = {
             TaskTrackingTopAppBar(
                 title = stringResource(AttemptListDestination.titleRes),
-                canNavigateBack = false,
+                canNavigateBack = canNavigateBack,
+                navigateUp = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         },

@@ -30,4 +30,35 @@ class OfflineAppRepository(
     override fun getByIdTaskWithAttemptedStream(id: Int): Flow<TaskWithAttempted> = taskWithAttemptedDao.getByIdTaskWithAttempted(id)
 
     override fun getAllByDateTaskWithAttemptedStream(date: LocalDate): Flow<List<TaskWithAttempted>> = taskWithAttemptedDao.getByDateTasksWithAttempted(date)
+//    {
+//
+//        val tasksFlow: Flow<List<Task>> = taskDao.getByDate(date)
+//        val attemptsFlow: Flow<List<Attempt>> = attemptDao.getByDate(date)
+//
+//        var taskWithAttemptedFlow: Flow<List<TaskWithAttempted>> = flowOf(listOf<TaskWithAttempted>())
+//        Log.d("HELP", "NOTHING????")
+//        tasksFlow.combine(attemptsFlow) {
+//            tasks, attempts -> {
+//            Log.d("TASKS", tasks.toString())
+//            Log.d("ATTEMPTS", attempts.toString())
+//                var i = 0
+//                val result = mutableListOf<TaskWithAttempted>()
+//                for (task in tasks) {
+//                    if (i < attempts.size && task.id == attempts[i].taskId) {
+//                        result.add(TaskWithAttempted(task, listOf(attempts[i])))
+//                        i += 1
+//                    } else {
+//                        result.add(TaskWithAttempted(task, listOf()))
+//                    }
+//                }
+//                taskWithAttemptedFlow = flowOf(result.toList())
+//            }
+//        }
+//
+//        return taskWithAttemptedFlow
+//    }
+
+    override fun getTaskByDate(date: LocalDate): Flow<List<Task>> = taskDao.getByDate(date)
+
+    override fun getAttemptByDate(date: LocalDate): Flow<List<Attempt>> = attemptDao.getByDate(date)
 }

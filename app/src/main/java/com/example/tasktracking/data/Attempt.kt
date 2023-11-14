@@ -11,5 +11,5 @@ data class Attempt(
     var attemptDateEnd: LocalDate,
     var completed: Int = 0,
     @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    var attemptId: Int = 0,
 )

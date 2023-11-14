@@ -69,4 +69,8 @@ interface AppRepository {
      * Retrieve all [TaskWithAttempted]s from the given data source that overlap with the [date].
      */
     fun getAllByDateTaskWithAttemptedStream(date: LocalDate): Flow<List<TaskWithAttempted>>
+
+    fun getTaskByDate(date: LocalDate): Flow<List<Task>>
+
+    fun getAttemptByDate(date: LocalDate): Flow<List<Attempt>>
 }

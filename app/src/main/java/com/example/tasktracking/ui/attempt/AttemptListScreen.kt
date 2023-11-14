@@ -25,6 +25,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,14 +64,13 @@ object AttemptListDestination : NavigationDestination {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AttemptListScreen(
-    navigateToNextDay: (String) -> Unit,
-    navigateToPreviousDay: (String) -> Unit,
+    navigateToDay: (String) -> Unit,
     navigateToTaskListScreen: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AttemptListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val attemptUiState = viewModel.attemptUiState
+    val attemptUiState by viewModel.attemptUiState.collectAsState()
     val updateAttempt = viewModel::updateAttempt
 
     Scaffold(
@@ -96,8 +97,7 @@ fun AttemptListScreen(
     ) { innerPadding ->
         AttemptListBody(
             dateUsed = viewModel.getDateUsed(),
-            navigateToNextDay = navigateToNextDay,
-            navigateToPreviousDay = navigateToPreviousDay,
+            navigateToDay = navigateToDay,
             attemptUiState = attemptUiState,
             updateAttempt = updateAttempt,
             modifier = Modifier
@@ -110,8 +110,7 @@ fun AttemptListScreen(
 @Composable
 private fun AttemptListBody(
     dateUsed: LocalDate,
-    navigateToNextDay: (String) -> Unit,
-    navigateToPreviousDay: (String) -> Unit,
+    navigateToDay: (String) -> Unit,
     attemptUiState: AttemptUiState,
     updateAttempt: KSuspendFunction1<Attempt, Unit>,
     modifier: Modifier = Modifier
@@ -120,17 +119,23 @@ private fun AttemptListBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Row {
+        Row (
+            verticalAlignment = Alignment.CenterVertically
+        ){
             Button(
                 onClick = {
-                    navigateToPreviousDay(dateUsed.minusDays(1).asString()) },
+                    navigateToDay(dateUsed.minusDays(1).asString()) },
                 content = {
                     Icon(Icons.Filled.ArrowBack, "previous day")
                 }
             )
-            Text(text = dateUsed.readableString())
+            Text(
+                text = dateUsed.readableString(),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(8.dp)
+            )
             Button(
-                onClick = { navigateToNextDay(dateUsed.plusDays(1).asString()) },
+                onClick = { navigateToDay(dateUsed.plusDays(1).asString()) },
                 content = {
                     Icon(Icons.Filled.ArrowForward, "Next day")
                 }

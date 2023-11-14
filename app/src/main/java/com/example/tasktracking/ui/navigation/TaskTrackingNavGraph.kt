@@ -80,8 +80,7 @@ fun TaskTrackingNavHost(
             arguments = listOf(navArgument("date") { defaultValue = LocalDate.now().asString() })
         ) {
             AttemptListScreen(
-                navigateToNextDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
-                navigateToPreviousDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
+                navigateToDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
                 navigateToTaskListScreen = { navController.navigate(HomeDestination.route) }
             )
         }
@@ -91,6 +90,7 @@ fun TaskTrackingNavHost(
         ) {
             TaskAttemptDetailScreen(
                 navigateToTaskEdit = { navController.navigate("${TaskEditDestination.route}/${it}") },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
     }

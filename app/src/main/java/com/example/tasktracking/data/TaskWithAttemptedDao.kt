@@ -24,4 +24,7 @@ interface TaskWithAttemptedDao {
     @Transaction
     @Query("SELECT * FROM tasks WHERE id = (:id)")
     fun getByIdTaskWithAttempted(id: Int): Flow<TaskWithAttempted>
+
+    @Query("SELECT * FROM tasks INNER JOIN attempted ON tasks.id = attempted.taskId WHERE tasks.id = (:id) ORDER BY attempted.attemptDateStart ASC")
+    fun getById(id: Int): Flow<TaskWithAttempted>
 }
