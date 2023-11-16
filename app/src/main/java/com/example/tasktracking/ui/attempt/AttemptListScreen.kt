@@ -1,6 +1,7 @@
 package com.example.tasktracking.ui.attempt
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,6 +67,7 @@ object AttemptListDestination : NavigationDestination {
 fun AttemptListScreen(
     navigateToDay: (String) -> Unit,
     navigateToTaskListScreen: () -> Unit,
+    navigateToTaskAttempt: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AttemptListViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -98,6 +100,7 @@ fun AttemptListScreen(
         AttemptListBody(
             dateUsed = viewModel.getDateUsed(),
             navigateToDay = navigateToDay,
+            onAttemptClick = navigateToTaskAttempt,
             attemptUiState = attemptUiState,
             updateAttempt = updateAttempt,
             modifier = Modifier
@@ -111,6 +114,7 @@ fun AttemptListScreen(
 private fun AttemptListBody(
     dateUsed: LocalDate,
     navigateToDay: (String) -> Unit,
+    onAttemptClick: (Int) -> Unit,
     attemptUiState: AttemptUiState,
     updateAttempt: KSuspendFunction1<Attempt, Unit>,
     modifier: Modifier = Modifier
@@ -150,6 +154,7 @@ private fun AttemptListBody(
         } else {
             AttemptedTaskList(
                 attemptUiState = attemptUiState,
+                onAttemptClick = onAttemptClick,
                 updateAttempt = updateAttempt,
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
@@ -160,6 +165,7 @@ private fun AttemptListBody(
 @Composable
 private fun AttemptedTaskList(
     attemptUiState: AttemptUiState,
+    onAttemptClick: (Int) -> Unit,
     updateAttempt: KSuspendFunction1<Attempt, Unit>,
     modifier: Modifier = Modifier
 ) {
@@ -169,21 +175,28 @@ private fun AttemptedTaskList(
                 taskWithAttempted = attempt.second,
                 updateAttempt = updateAttempt,
                 modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small)))
+                    .padding(dimensionResource(id = R.dimen.padding_small))
+                    .clickable { onAttemptClick(attempt.second.task.id) }
+            )
         }
         items(items = attemptUiState.weekly.toList(), key = { it }) { attempt ->
             IndividualAttempt(
                 taskWithAttempted = attempt.second,
                 updateAttempt = updateAttempt,
                 modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small)))
+                    .padding(dimensionResource(id = R.dimen.padding_small))
+                    .clickable { onAttemptClick(attempt.second.task.id) }
+            )
         }
         items(items = attemptUiState.monthly.toList(), key = { it }) { attempt ->
             IndividualAttempt(
                 taskWithAttempted = attempt.second,
                 updateAttempt = updateAttempt,
                 modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small)))
+                    .padding(dimensionResource(id = R.dimen.padding_small))
+                    .clickable { onAttemptClick(attempt.second.task.id) }
+            )
+
         }
         if (attemptUiState.completed.isNotEmpty()) {
             item {
@@ -195,6 +208,7 @@ private fun AttemptedTaskList(
                     updateAttempt = updateAttempt,
                     modifier = Modifier
                         .padding(dimensionResource(id = R.dimen.padding_small))
+                        .clickable { onAttemptClick(attempt.second.task.id) }
                 )
             }
         }
@@ -212,7 +226,7 @@ private fun IndividualAttempt(
 
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large)),

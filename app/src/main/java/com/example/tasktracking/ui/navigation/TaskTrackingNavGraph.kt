@@ -81,7 +81,8 @@ fun TaskTrackingNavHost(
         ) {
             AttemptListScreen(
                 navigateToDay = { navController.navigate("${AttemptListDestination.route}?${AttemptListDestination.dateArg}=${it}") },
-                navigateToTaskListScreen = { navController.navigate(HomeDestination.route) }
+                navigateToTaskListScreen = { navController.navigate(HomeDestination.route) },
+                navigateToTaskAttempt = { navController.navigate("${TaskAttemptDetailDestination.route}?${TaskAttemptDetailDestination.taskId}=${it}") },
             )
         }
         composable(
