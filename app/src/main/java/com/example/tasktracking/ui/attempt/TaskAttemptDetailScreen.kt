@@ -26,10 +26,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasktracking.R
@@ -61,11 +59,11 @@ fun TaskAttemptDetailScreen(
     canNavigateBack: Boolean = true,
     viewModel: TaskAttemptDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val taskAttemptUiState = viewModel.taskAttemptDetailUiState
 
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         topBar = {
             TaskTrackingTopAppBar(
                 title = stringResource(AttemptListDestination.titleRes),
@@ -90,7 +88,7 @@ fun TaskAttemptDetailScreen(
         TaskAttemptDetailBody(
             taskAttemptUiState = taskAttemptUiState,
             modifier = Modifier
-                .padding(top= innerPadding.calculateTopPadding(), bottom = 0.dp)
+                .padding(top = innerPadding.calculateTopPadding(), bottom = 0.dp)
                 .fillMaxSize()
         )
     }
@@ -111,7 +109,7 @@ fun TaskAttemptDetailBody(
                 .padding(dimensionResource(id = R.dimen.padding_small))
                 .wrapContentHeight()
         )
-        Divider(thickness = Dp.Hairline)
+        Divider(thickness = 1.dp)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(items = taskAttemptUiState.attempted, key = { it.attemptId }) {
                 attempt ->

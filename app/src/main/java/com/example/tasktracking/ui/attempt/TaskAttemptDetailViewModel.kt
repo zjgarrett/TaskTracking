@@ -34,5 +34,6 @@ data class TaskAttemptDetailUiState(
 )
 
 fun TaskWithAttempted.toDetailUiState(): TaskAttemptDetailUiState {
-    return TaskAttemptDetailUiState(this.task, this.attempts)
+    val edited_attempts = this.attempts.sortedByDescending { it.attemptDateStart }
+    return TaskAttemptDetailUiState(this.task, edited_attempts)
 }
