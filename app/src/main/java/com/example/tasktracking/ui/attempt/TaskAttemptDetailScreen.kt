@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -26,6 +27,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,10 +35,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasktracking.R
 import com.example.tasktracking.TaskTrackingTopAppBar
 import com.example.tasktracking.data.Attempt
+import com.example.tasktracking.data.Task
 import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.home.IndividualTask
 import com.example.tasktracking.ui.navigation.NavigationDestination
 import com.example.tasktracking.ui.task.readableString
+import java.time.LocalDate
 
 
 object TaskAttemptDetailDestination : NavigationDestination {
@@ -115,6 +119,7 @@ fun TaskAttemptDetailBody(
                 attempt ->
                 IndividualAttemptDetail(
                     attempt = attempt,
+                    task = taskAttemptUiState.task,
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_small)))
             }
         }
@@ -124,10 +129,17 @@ fun TaskAttemptDetailBody(
 @Composable
 fun IndividualAttemptDetail(
     attempt: Attempt,
+    task: Task,
     modifier: Modifier
 ) {
+    val backgroundColor =
+        if (attempt.attemptDateStart <= LocalDate.now() && LocalDate.now() <= attempt.attemptDateEnd)
+            colorResource(R.color.light_gray)
+        else if (attempt.completed < task.goal) colorResource(R.color.light_red)
+        else colorResource(id = R.color.light_green)
     Card(
         modifier = modifier,
+        colors = cardColors(backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
