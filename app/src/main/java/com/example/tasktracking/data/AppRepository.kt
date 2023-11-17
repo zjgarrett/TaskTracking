@@ -73,4 +73,6 @@ interface AppRepository {
     fun getTaskByDate(date: LocalDate): Flow<List<Task>>
 
     fun getAttemptByDate(date: LocalDate): Flow<List<Attempt>>
+
+    suspend fun addSkippedAttempts()
 }

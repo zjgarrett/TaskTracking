@@ -70,6 +70,8 @@ fun List<TaskWithAttempted>.toAttemptUiState(date: LocalDate): AttemptUiState {
         var todaysAttempt = Attempt(taskAttempt.task.id, date, date)
         Log.d("Num Attempts Recieved", taskAttempt.attempts.toString())
 
+        if (date.dayOfWeek !in taskAttempt.task.frequency) continue
+
         for (attempt in taskAttempt.attempts) {
             Log.d("Attempt: ", attempt.toString())
             if (attempt.attemptDateStart <= date && attempt.attemptDateEnd >= date) {

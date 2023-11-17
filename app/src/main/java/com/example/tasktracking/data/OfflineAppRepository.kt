@@ -1,6 +1,9 @@
 package com.example.tasktracking.data
 
+import android.util.Log
+import com.example.tasktracking.ui.task.readableString
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
 class OfflineAppRepository(
@@ -61,4 +64,49 @@ class OfflineAppRepository(
     override fun getTaskByDate(date: LocalDate): Flow<List<Task>> = taskDao.getByDate(date)
 
     override fun getAttemptByDate(date: LocalDate): Flow<List<Attempt>> = attemptDao.getByDate(date)
+
+    override suspend fun addSkippedAttempts() {
+        val tasksWithAttempts = taskWithAttemptedDao.getTasksWithAttempted().first()
+        val today = LocalDate.now()
+        for (taskAttempt in tasksWithAttempts) {
+            val orderedAttempts = taskAttempt.attempts.sortedByDescending { it.attemptDateStart }
+            if (
+                orderedAttempts.isEmpty() ||
+                (orderedAttempts[0].attemptDateEnd < today
+                && orderedAttempts[0].attemptDateEnd != taskAttempt.task.endDate)
+                ) {
+                var startDate = if (orderedAttempts.isEmpty()) taskAttempt.task.startDate else orderedAttempts[0].attemptDateEnd.plusDays(1)
+                while (startDate <= today) {
+                    var endDate = when (taskAttempt.task.period) {
+                        Period.DAY -> {
+                            if (startDate.dayOfWeek in taskAttempt.task.frequency) {
+                                startDate = startDate.plusDays(1)
+                                continue
+                            }
+                            startDate
+                        }
+                        Period.WEEK -> {
+                            startDate.plusDays((6 - (startDate.dayOfWeek.value % 7)).toLong())
+                        }
+                        Period.MONTH -> {
+                            startDate.plusMonths(1).minusDays(startDate.dayOfMonth.toLong())
+                        }
+                    }
+
+                    if (endDate > taskAttempt.task.endDate) endDate = taskAttempt.task.endDate
+
+                    Log.d("NEW ATTEMPT ENTRY", taskAttempt.task.name + " " + startDate.readableString() + " " + endDate.readableString())
+                    attemptDao.upsert(
+                        Attempt(
+                            taskAttempt.task.id,
+                            startDate,
+                            endDate,
+                        )
+                    )
+                    startDate = endDate.plusDays(1)
+                }
+            }
+        }
+
+    }
 }
