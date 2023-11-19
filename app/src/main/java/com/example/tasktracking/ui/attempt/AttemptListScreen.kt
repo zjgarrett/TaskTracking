@@ -156,6 +156,7 @@ private fun AttemptListBody(
                 attemptUiState = attemptUiState,
                 onAttemptClick = onAttemptClick,
                 updateAttempt = updateAttempt,
+                dateUsed = dateUsed,
                 modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_small))
             )
         }
@@ -167,36 +168,19 @@ private fun AttemptedTaskList(
     attemptUiState: AttemptUiState,
     onAttemptClick: (Int) -> Unit,
     updateAttempt: KSuspendFunction1<Attempt, Unit>,
+    dateUsed: LocalDate,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
-        items(items = attemptUiState.daily.toList(), key = { it }) { attempt ->
+        items(items = attemptUiState.daily.toList() + attemptUiState.weekly.toList() + attemptUiState.monthly.toList(), key = { it }) { attempt ->
             IndividualAttempt(
                 taskWithAttempted = attempt.second,
                 updateAttempt = updateAttempt,
+                dateUsed = dateUsed,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small))
                     .clickable { onAttemptClick(attempt.second.task.id) }
             )
-        }
-        items(items = attemptUiState.weekly.toList(), key = { it }) { attempt ->
-            IndividualAttempt(
-                taskWithAttempted = attempt.second,
-                updateAttempt = updateAttempt,
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small))
-                    .clickable { onAttemptClick(attempt.second.task.id) }
-            )
-        }
-        items(items = attemptUiState.monthly.toList(), key = { it }) { attempt ->
-            IndividualAttempt(
-                taskWithAttempted = attempt.second,
-                updateAttempt = updateAttempt,
-                modifier = Modifier
-                    .padding(dimensionResource(id = R.dimen.padding_small))
-                    .clickable { onAttemptClick(attempt.second.task.id) }
-            )
-
         }
         if (attemptUiState.completed.isNotEmpty()) {
             item {
@@ -206,6 +190,7 @@ private fun AttemptedTaskList(
                 IndividualAttempt(
                     taskWithAttempted = attempt.second,
                     updateAttempt = updateAttempt,
+                    dateUsed = dateUsed,
                     modifier = Modifier
                         .padding(dimensionResource(id = R.dimen.padding_small))
                         .clickable { onAttemptClick(attempt.second.task.id) }
@@ -219,6 +204,7 @@ private fun AttemptedTaskList(
 private fun IndividualAttempt(
     taskWithAttempted: TaskWithAttemptedDetails,
     updateAttempt: KSuspendFunction1<Attempt, Unit>,
+    dateUsed: LocalDate,
     modifier: Modifier = Modifier
 ) {
     val attempt: Attempt = taskWithAttempted.attempt
@@ -285,15 +271,16 @@ private fun IndividualAttempt(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-            Button(
-                onClick = { coroutineScope.launch{
-                    updateAttempt(attempt.copy(completed = attempt.completed + 1))
-                } },
-                enabled = true,
-                content = {
-                    Icon(Icons.Filled.Add, "Add completion")
-                }
-            )
+            if (dateUsed <= LocalDate.now()) {
+                Button(
+                    onClick = { coroutineScope.launch{
+                        updateAttempt(attempt.copy(completed = attempt.completed + 1))
+                    } },
+                    content = {
+                        Icon(Icons.Filled.Add, "Add completion")
+                    }
+                )
+            }
         }
     }
 }
