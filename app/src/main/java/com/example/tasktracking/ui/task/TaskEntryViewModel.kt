@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.tasktracking.data.AppRepository
+import com.example.tasktracking.data.Attempt
 import com.example.tasktracking.data.DEFAULT_FREQUENCY
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskType
+import com.example.tasktracking.data.attemptEndDate
 import java.lang.Integer.parseInt
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -43,7 +45,20 @@ class TaskEntryViewModel(private val appRepository: AppRepository) : ViewModel()
 
     suspend fun saveTask() {
         if (validateInput()) {
-            appRepository.insertTask(taskUiState.taskDetails.toTask())
+            val asTask = taskUiState.taskDetails.toTask()
+            appRepository.insertTask(asTask)
+            if (asTask.startDate == LocalDate.now()) {
+                val endDate = asTask.attemptEndDate(asTask.startDate)
+                endDate?.let {
+                    appRepository.insertAttempt(
+                        Attempt(
+                            asTask.id,
+                            asTask.startDate,
+                            it
+                        )
+                    )
+                }
+            }
         }
     }
 }

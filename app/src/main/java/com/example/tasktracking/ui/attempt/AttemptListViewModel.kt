@@ -9,6 +9,7 @@ import com.example.tasktracking.data.Attempt
 import com.example.tasktracking.data.Period
 import com.example.tasktracking.data.Task
 import com.example.tasktracking.data.TaskWithAttempted
+import com.example.tasktracking.data.attemptEndDate
 import com.example.tasktracking.ui.task.asString
 import com.example.tasktracking.ui.task.toLocalDate
 import kotlinx.coroutines.flow.SharingStarted
@@ -81,30 +82,22 @@ fun List<TaskWithAttempted>.toAttemptUiState(date: LocalDate): AttemptUiState {
         }
         if (!attemptExists) {
             var start = date
-            var end = date
             if (taskAttempt.task.period == Period.WEEK) {
                 val tempStart = start.minusDays((start.dayOfWeek.value % 7).toLong())
                 start = if (tempStart >= taskAttempt.task.startDate) tempStart
                 else taskAttempt.task.startDate
-
-                val tempEnd = end.plusDays((6 - (start.dayOfWeek.value % 7)).toLong())
-                end = if (tempEnd <= taskAttempt.task.endDate) tempEnd
-                else taskAttempt.task.endDate
             } else if (taskAttempt.task.period == Period.MONTH) {
                 val tempStart = start.minusDays((start.dayOfMonth - 1).toLong())
                 start = if (tempStart >= taskAttempt.task.startDate) tempStart
                 else taskAttempt.task.startDate
-
-                var tempEnd = end.plusMonths(1)
-                tempEnd = tempEnd.minusDays(end.dayOfMonth.toLong())
-                end = if (tempEnd <= taskAttempt.task.endDate) tempEnd
-                else taskAttempt.task.endDate
             }
+
+            val end = taskAttempt.task.attemptEndDate(start)
 
             todaysAttempt = Attempt(
                 taskId = taskAttempt.task.id,
                 attemptDateStart = start,
-                attemptDateEnd = end
+                attemptDateEnd = end!!
             )
         }
 

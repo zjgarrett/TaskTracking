@@ -58,3 +58,25 @@ data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0
 )
 
+
+fun Task.attemptEndDate(startDate: LocalDate): LocalDate? {
+    var endDate = when (this.period) {
+        Period.DAY -> {
+            if (startDate.dayOfWeek !in this.frequency) {
+                return null
+            }
+            startDate
+        }
+        Period.WEEK -> {
+            startDate.plusDays((6 - (startDate.dayOfWeek.value % 7)).toLong())
+        }
+        Period.MONTH -> {
+            startDate.plusMonths(1).minusDays(startDate.dayOfMonth.toLong())
+        }
+    }
+
+    if (endDate > this.endDate) endDate = this.endDate
+
+    return endDate
+}
+

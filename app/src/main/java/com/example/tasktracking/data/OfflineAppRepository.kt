@@ -77,23 +77,11 @@ class OfflineAppRepository(
                 ) {
                 var startDate = if (orderedAttempts.isEmpty()) taskAttempt.task.startDate else orderedAttempts[0].attemptDateEnd.plusDays(1)
                 while (startDate <= today) {
-                    var endDate = when (taskAttempt.task.period) {
-                        Period.DAY -> {
-                            if (startDate.dayOfWeek in taskAttempt.task.frequency) {
-                                startDate = startDate.plusDays(1)
-                                continue
-                            }
-                            startDate
-                        }
-                        Period.WEEK -> {
-                            startDate.plusDays((6 - (startDate.dayOfWeek.value % 7)).toLong())
-                        }
-                        Period.MONTH -> {
-                            startDate.plusMonths(1).minusDays(startDate.dayOfMonth.toLong())
-                        }
+                    val endDate = taskAttempt.task.attemptEndDate(startDate)
+                    if (endDate == null) {
+                        startDate = startDate.plusDays(1)
+                        continue
                     }
-
-                    if (endDate > taskAttempt.task.endDate) endDate = taskAttempt.task.endDate
 
                     Log.d("NEW ATTEMPT ENTRY", taskAttempt.task.name + " " + startDate.readableString() + " " + endDate.readableString())
                     attemptDao.upsert(
