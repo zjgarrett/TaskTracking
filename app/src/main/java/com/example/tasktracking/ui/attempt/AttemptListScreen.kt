@@ -130,7 +130,7 @@ private fun AttemptListBody(
                 onClick = {
                     navigateToDay(dateUsed.minusDays(1).asString()) },
                 content = {
-                    Icon(Icons.Filled.ArrowBack, "previous day")
+                    Icon(Icons.Filled.ArrowBack, stringResource(id = R.string.previous_day))
                 }
             )
             Text(
@@ -141,13 +141,13 @@ private fun AttemptListBody(
             Button(
                 onClick = { navigateToDay(dateUsed.plusDays(1).asString()) },
                 content = {
-                    Icon(Icons.Filled.ArrowForward, "Next day")
+                    Icon(Icons.Filled.ArrowForward, stringResource(id = R.string.next_day))
                 }
             )
         }
         if (attemptUiState.daily.isEmpty() && attemptUiState.weekly.isEmpty() && attemptUiState.monthly.isEmpty() && attemptUiState.completed.isEmpty()) {
             Text(
-                text = stringResource(R.string.no_tasks_description) + " Today",
+                text = stringResource(R.string.no_tasks_description),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
