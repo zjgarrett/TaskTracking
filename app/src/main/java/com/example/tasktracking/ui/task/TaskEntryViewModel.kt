@@ -82,6 +82,11 @@ data class TaskDetails(
     val frequency: MutableSet<DayOfWeek> = DEFAULT_FREQUENCY.toMutableSet()
 )
 
+data class DateUiState(
+    var displayStart: Boolean = false,
+    var displayEnd: Boolean = false
+)
+
 /**
  * Extension function to convert [TaskDetails] to [Task]
  */

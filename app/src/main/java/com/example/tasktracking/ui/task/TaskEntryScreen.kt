@@ -1,16 +1,24 @@
 package com.example.tasktracking.ui.task
 
 
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,17 +28,26 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tasktracking.TaskTrackingTopAppBar
@@ -42,7 +59,11 @@ import com.example.tasktracking.ui.AppViewModelProvider
 import com.example.tasktracking.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 object TaskEntryDestination : NavigationDestination {
     override val route = "task_entry"
@@ -111,6 +132,7 @@ fun TaskEntryBody(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskInputForm(
     taskDetails: TaskDetails,
@@ -174,19 +196,21 @@ fun TaskInputForm(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
-                value = taskDetails.startDate.formatDate(),
-                onValueChange = { onValueChange(taskDetails.copy(startDate = it.cleanInputDate())) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text(stringResource(R.string.start_date)) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ),
+            // TODO Create a more complex state
+            // The state will hold the date, reference to dismiss function, and reference to confirm function
+            val dialogState = remember { mutableStateOf(DateUiState())}
+            fun dismiss() {
+                dialogState.value.displayEnd = false
+                dialogState.value.displayStart = false
+            }
+
+            ClickableText(
+                text = AnnotatedString(taskDetails.startDate.formatDate()),
+                onClick = {
+                    dialogState.value.displayStart = true
+                    dialogState.value.displayEnd = false
+                          },
                 modifier = Modifier.weight(1f),
-                enabled = enabled,
-                singleLine = true
             )
             OutlinedTextField(
                 value = taskDetails.endDate.formatDate(),
@@ -202,6 +226,22 @@ fun TaskInputForm(
                 enabled = enabled,
                 singleLine = true
             )
+            if (dialogState.value.displayStart) {
+                val datePickerState =
+                    rememberDatePickerState(initialSelectedDateMillis = taskDetails.startDate.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                dateDialog(datePickerState, { dismiss() })?.let {
+                    onValueChange(taskDetails.copy(startDate= Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate().asString()))
+                }
+            }
+            if (dialogState.value.displayEnd) {
+                val datePickerState =
+                    rememberDatePickerState(initialSelectedDateMillis = taskDetails.endDate.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                dateDialog(datePickerState, { dismiss() })?.let {
+                    onValueChange(taskDetails.copy(endDate= Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate().asString()))
+                }
+
+            }
+
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -267,6 +307,28 @@ fun TaskInputForm(
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun dateDialog(datePickerState: DatePickerState, dismiss: () -> Unit): Long? {
+    var result = datePickerState.selectedDateMillis
+    DatePickerDialog(
+        onDismissRequest = { dismiss() },
+        dismissButton = {
+            Button(onClick = { dismiss() }) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            Button(onClick = { result = datePickerState.selectedDateMillis }) {
+                Text(stringResource(R.string.ok))
+            }
+        }) {
+        DatePicker(state = datePickerState)
+    }
+
+    return result
 }
 
 @Preview(showBackground = true)
